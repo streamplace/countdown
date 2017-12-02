@@ -17,6 +17,5 @@ workdir="$(mktemp -d)"
   git add .
   git commit -m "auto-publish $(date)"
   git push
-  pwd
 )
-# rm -rf "$workdir"
+rm -rf "$workdir"
