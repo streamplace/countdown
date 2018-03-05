@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import styled from "styled-components";
 import pad from "left-pad";
 import { shadow } from "./Text";
+import chrono from "chrono-node";
 
 const Number = styled.span`
   text-shadow: ${(shadow(70), "black")};
@@ -58,16 +59,65 @@ export default class Countdown extends Component {
   constructor(props) {
     super(props);
     this.go = this.go.bind(this);
+    this.state = {
+      toText: "five minutes from now",
+      to: chrono.parse("five minutes from now")
+    }
   }
+  
   componentWillMount() {
-    this.go();
+    this.componentWillReceiveProps(this.props);
+  }
+
+  componentDidMount() {
+    setTimeout(() => this.go());
+  }
+  
+  static defaultProps = {
+    to: "five minutes from now"
+  }
+  
+  componentWillReceiveProps(props) {
+    if (props.from) {
+      if (this.state.fromText === props.from) {
+        return;
+      }
+      this.setState({
+        fromText: props.from,
+        from: chrono.parseDate(props.from),
+        to: null,
+        toText: null
+      });
+      return;
+    }
+    if (this.state.toText === props.to) {
+      return;
+    }
+    this.setState({
+      to: chrono.parseDate(props.to),
+      toText: props.to,
+      from: null,
+      fromText: null
+    });
+  }
+
+  getDiff() {
+    if (this.state.from) {
+      return Date.now() - this.state.from.getTime();
+    }
+    return this.state.to.getTime() - Date.now();
   }
 
   go() {
+    
     if (this.done) {
       return;
     }
-    let diff = this.props.to.getTime() - Date.now();
+    if (!this.state.to && !this.state.from) {
+      requestAnimationFrame(this.go);
+      return;
+    }
+    let diff = this.getDiff();
 
     if (diff < 0) {
       return this.setState({
