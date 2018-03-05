@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import "./App.css";
 import styled, { injectGlobal } from "styled-components";
 import "./FiraCode/stylesheet.css";
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom";
 import Countdown from "./Countdown";
 
 // const Keyframe = Layer;
@@ -37,12 +37,28 @@ class App extends Component {
         <Router>
           <Switch>
             <Route
-              path={"/countdown/:to"}
+              path={"/(.*) (.*)"}
               component={props => (
-                <Countdown to={new Date(props.match.params.to)} />
+                <Redirect to={props.match.url.replace(/ /g, "_")} />
               )}
             />
-            <Route component={props => <div>404</div>} />
+            <Route
+              path={"/from/:from"}
+              component={props => (
+                <Countdown from={props.match.params.from.replace(/_/g, " ")} />
+              )}
+            />
+            <Route
+              path={"/:to"}
+              component={props => (
+                <Countdown to={props.match.params.to.replace(/_/g, " ")} />
+              )}
+            />
+            <Route
+              component={props => (
+                <Countdown to={""} />
+              )}
+            />
           </Switch>
         </Router>
       </Centered>
